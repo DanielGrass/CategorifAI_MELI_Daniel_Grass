@@ -221,49 +221,48 @@ if st.session_state.selected_main:
         st.markdown(tareas_ml_propuestas)
         
     elif st.session_state.selected_main == "Deseable":
-        menu_options = st.radio(
-            "Opciones de Deseable",
-            options=["Versionado de Código", "Feature Engineering", "Modelo Predictivo", "Mostrar Skills en Python", "Casos de Uso", "Métricas"],
-            horizontal=True
+        st.header("Tareas requeridas")
+        st.write("**`Versionado de Código`**: Versionado de código con Git (incluso puede publicarse en tu cuenta personal de GitHub).")
+        st.markdown(
+            """
+            <a href="https://github.com/DanielGrass/CategorifAI_MELI_Daniel_Grass" target="_blank">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="20"/>
+                GitHub - CategorifAI_MELI_Daniel_Grass
+            </a>
+            """,
+            unsafe_allow_html=True
         )
+        st.write("**`Feature Engineering`**: Indicar y calcular posibles candidatos de features que podrían utilizarse tanto columnas originales y transformaciones.")
+        st.write("**`Modelo Predictivo`**: Realice un modelo predictivo.**)")
+        st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")
+        st.markdown(
+            """
+            **`Mostrar Skills en Python`**: Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
 
-        # Mostrar el contenido correspondiente
-        if menu_options == "Versionado de Código":
-            st.header("Versionado de Código")
-            st.write("Versionado de código con Git (incluso puede publicarse en tu cuenta personal de GitHub).")
+            1. **Organización del Código**: El código está estructurado en módulos claros y separados, lo que facilita la comprensión, el mantenimiento y la escalabilidad del proyecto. Se siguen convenciones de nombres y se utiliza la modularidad para organizar funciones y componentes de manera eficiente.
 
-        elif menu_options == "Feature Engineering":
-            st.header("Feature Engineering")
-            st.write("Indicar y calcular posibles candidatos de features que podrían utilizarse tanto columnas originales y transformaciones.")
+            2. **Uso de Funciones y Modularización**: Se emplea una buena práctica de definir funciones para tareas repetitivas, minimizando la redundancia y mejorando la legibilidad del código. Las funciones se han agrupado lógicamente en módulos como `theme_toggle.py`, `description_dataset.py`, y `data_loader.py`, siguiendo un enfoque modular que facilita la navegación y el mantenimiento del código.
 
-        elif menu_options == "Modelo Predictivo":
-            st.header("Modelo Predictivo")
-            st.write("Realice un modelo predictivo.")
+            3. **Documentación y Comentarios Claros**: El código contiene comentarios que explican secciones clave, ayudando a otros desarrolladores a comprender el flujo y la lógica implementada. Además, se proporciona un archivo `README.md` detallado en el repositorio [CategorifAI_MELI_Daniel_Grass](https://github.com/DanielGrass/CategorifAI_MELI_Daniel_Grass/blob/main/README.md), que ofrece una visión general del proyecto, instrucciones de instalación y guía de uso, lo que refuerza la accesibilidad y facilita la replicación del proyecto por otros usuarios.
 
-        elif menu_options == "Mostrar Skills en Python":
-            st.header("Mostrar Skills en Python")
-            st.write("Teniendo buenas prácticas en la estructura del código y la documentación.")
+            4. **Buenas Prácticas de Versionado de Código**: El uso de Git y GitHub para el control de versiones asegura un seguimiento detallado de los cambios, facilitando la colaboración y manteniendo un historial limpio y organizado del desarrollo del proyecto.
 
-        elif menu_options == "Casos de Uso":
-            st.header("Casos de Uso")
-            st.write("Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
+            5. **Estilo de Código Consistente**: Se sigue la convención de estilo PEP 8 de Python, lo que garantiza un código limpio, legible y profesional. Esto incluye la consistencia en la indentación, el uso adecuado de espacios, nombres de variables descriptivos y un enfoque general que favorece la mantenibilidad.
 
-        elif menu_options == "Métricas":
-            st.header("Métricas")
-            st.write("Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
+            6. **Uso de Librerías Populares y Eficientes**: El proyecto emplea librerías avanzadas como `pandas`, `numpy`, `plotly` y `streamlit`, lo que muestra habilidades en la utilización de herramientas robustas y eficientes para la manipulación de datos, visualización y desarrollo de aplicaciones interactivas.
+
+            7. **Manejo de Errores y Validaciones**: Se han implementado controles y validaciones en la carga y manipulación de datos, lo que muestra una atención al detalle y una estrategia proactiva para evitar fallos durante la ejecución del programa.
+
+            Estas prácticas no solo demuestran habilidades técnicas avanzadas en Python, sino también una dedicación a la escritura de código de calidad que es fácil de entender y reutilizar, destacando la capacidad de estructurar y documentar proyectos de manera profesional.
+
+            """
+        )
+        st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
+        st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
+
 
     elif st.session_state.selected_main == "Bonus":
-        menu_options = st.radio(
-            "Opciones de Bonus",
-            options=["Manejo de Environment de Desarrollo", "Identificar Nuevos Atributos"],
-            horizontal=True
-        )
-
-        # Mostrar el contenido correspondiente
-        if menu_options == "Manejo de Environment de Desarrollo":
-            st.header("Manejo de Environment de Desarrollo")
-            st.write("Manejo de environment de desarrollo mediante alguna tecnología (e.g. Docker, virtualenv, conda).")
-
-        elif menu_options == "Identificar Nuevos Atributos":
-            st.header("Identificar Nuevos Atributos")
-            st.write("Identificar nuevos atributos / tablas que podrían ser relevantes o necesarias para un mejor análisis.")
+        st.header("Tareas requeridas")
+        st.write("**`Manejo de Environment de Desarrollo`**: Manejo de environment de desarrollo mediante alguna tecnología (e.g. Docker, virtualenv, conda).")
+        st.write("**`Identificar Nuevos Atributos`**: Identificar nuevos atributos / tablas que podrían ser relevantes o necesarias para un mejor análisis.")
+       
