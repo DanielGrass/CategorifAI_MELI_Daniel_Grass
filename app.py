@@ -66,20 +66,20 @@ if st.session_state.selected_main:
         ##################################################################################
         ###############1. Imprimir los datos originales del archivo Parquet proporcionado.
         ##################################################################################
-        st.header("1. Imprimir los datos originales del archivo Parquet proporcionado.")
+        st.header("1.1. Imprimir los datos originales del archivo Parquet proporcionado.")
         if df is not None:
             st.write(df)  # Muestra el DataFrame en Streamlit
 
         ##################################################################################
         ###############2. Análisis de tipos de datos y valores nulos
         ##################################################################################
-        st.header("2. Análisis de tipos de datos y valores nulos")        
+        st.header("1.2. Análisis de tipos de datos y valores nulos")        
         null_analysis(df)
 
         ##################################################################################
         ###############3. Análisis Categórico:
         ##################################################################################
-        st.header("3. Análisis Categórico:")
+        st.header("1.3. Análisis Categórico:")
         
         # Análisis de la columna `category`
         st.subheader("Distribución de `category`")
@@ -119,7 +119,7 @@ if st.session_state.selected_main:
         ############################################################################################
         ###############4. Análisis variables continuas (Distribuciones y tratamiento de anomalos):
         ############################################################################################
-        st.header("4. Análisis variables continuas (Distribuciones y tratamiento de anomalos:")
+        st.header("1.4. Análisis variables continuas (Distribuciones y tratamiento de anomalos:")
 
         numerical_columns = ['withdrawal_amt', 'deposit_amt', 'balance_amt']
         # Visualización de cada variable continua antes y después de remover outliers
@@ -182,7 +182,7 @@ if st.session_state.selected_main:
         ############################################################################################
         ###############5. Análisis de Fechas de Transacción y Finalización:
         ############################################################################################
-        st.header("5. Análisis de Fechas de Transacción y Finalización")
+        st.header("1.5. Análisis de Fechas de Transacción y Finalización")
     
         analysis_datetime_variables(df)
         analysis_withdrawal_deposit(df)
@@ -206,7 +206,7 @@ if st.session_state.selected_main:
         ############################################################################################
         ###############6. Tareas de Machine Learning Propuestas:
         ############################################################################################
-        st.header("6. Tareas de Machine Learning Propuestas")
+        st.header("1.6. Tareas de Machine Learning Propuestas")
         tareas_ml_propuestas = """
                         1. **`Modelo de Clasificación para la Segmentación de Clientes`**: Segmentar a los usuarios en grupos con comportamientos financieros similares (ej. ahorradores, gastadores, deudores), permitiendo personalizar ofertas y servicios, optimizando la estrategia de retención y satisfacción del cliente. **Modelos Sugeridos**: Algoritmos de clustering como K-Means o DBSCAN, o clasificación supervisada utilizando Random Forest.
 
@@ -222,7 +222,14 @@ if st.session_state.selected_main:
         
     elif st.session_state.selected_main == "Deseable":
         st.header("Tareas requeridas")
-        st.write("**`Versionado de Código`**: Versionado de código con Git (incluso puede publicarse en tu cuenta personal de GitHub).")
+        st.write("**`Versionado de Código`**: Versionado de código con Git (incluso puede publicarse en tu cuenta personal de GitHub).")        
+        st.write("**`Feature Engineering`**: Indicar y calcular posibles candidatos de features que podrían utilizarse tanto columnas originales y transformaciones.")
+        st.write("**`Modelo Predictivo`**: Realice un modelo predictivo.**)")
+        st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")        
+        st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
+        st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
+
+        st.header("2.1 Versionado de Código")
         st.markdown(
             """
             <a href="https://github.com/DanielGrass/CategorifAI_MELI_Daniel_Grass" target="_blank">
@@ -232,9 +239,7 @@ if st.session_state.selected_main:
             """,
             unsafe_allow_html=True
         )
-        st.write("**`Feature Engineering`**: Indicar y calcular posibles candidatos de features que podrían utilizarse tanto columnas originales y transformaciones.")
-        st.write("**`Modelo Predictivo`**: Realice un modelo predictivo.**)")
-        st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")
+        st.header("2.2 Mostrar Skills en Python")
         st.markdown(
             """
             **`Respuesta:`**: Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
@@ -257,9 +262,6 @@ if st.session_state.selected_main:
 
             """
         )
-        st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
-        st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
-
 
     elif st.session_state.selected_main == "Bonus":
         st.header("Tareas requeridas")
