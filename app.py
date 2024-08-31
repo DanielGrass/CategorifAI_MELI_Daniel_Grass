@@ -27,10 +27,8 @@ with st.sidebar:
     st.image(logo_url, use_column_width=True)  # Muestra el logo desde la URL
     st.title("Menú Principal")
       
-    # Botón para cambiar entre modo claro y oscuro con íconos de sol y luna
-    theme_button = "🌙" if not st.session_state.dark_mode else "☀️"
-    st.button(theme_button, on_click=toggle_theme)
-
+    
+    st.session_state.selected_main = "Requerido"
     # Botones principales para secciones
     if st.button("Requerido"):
         st.session_state.selected_main = "Requerido"
@@ -40,6 +38,10 @@ with st.sidebar:
 
     if st.button("Bonus"):
         st.session_state.selected_main = "Bonus"
+    
+    # Botón para cambiar entre modo claro y oscuro con íconos de sol y luna
+    theme_button = "🌙" if not st.session_state.dark_mode else "☀️"
+    st.button(theme_button, on_click=toggle_theme)
 
 # Menú horizontal a la derecha basado en la selección
 st.title("Data Science Technical Challenge - CategorifAI")
@@ -187,22 +189,39 @@ if st.session_state.selected_main:
         analysis_datetime_variables(df)
         analysis_withdrawal_deposit(df)
         conclusiones_fechas_transaccion = """
-                        ### Conclusiones de Análisis de Fechas de Transacción y Finalización
+        ### Conclusiones de Análisis de Fechas de Transacción y Finalización
 
-                        **Análisis de Conteo Total de Transacciones Diarias**:
-                        - La gráfica muestra una tendencia general de aumento en la cantidad de transacciones diarias a lo largo del tiempo, especialmente a partir de mediados de 2016. Este crecimiento podría indicar un incremento en la actividad de los usuarios o en la adopción de los servicios a lo largo del periodo analizado.                        
-                        - Se observan varios picos pronunciados en la cantidad de transacciones, especialmente entre 2017 y 2018. Estos picos podrían estar asociados a eventos específicos, promociones, campañas comerciales, o comportamientos anómalos que podrían requerir un análisis adicional para identificar sus causas.                        
-                        - Desde 2015 hasta mediados de 2016, la actividad de transacciones parece más estable y con un volumen relativamente bajo, lo que podría reflejar una etapa temprana o más controlada del sistema.
-                        - Se recomienda realizar un análisis de causalidad para identificar si ciertos eventos, políticas o promociones están directamente relacionados con los aumentos o disminuciones en la actividad de las transacciones.    
-                        - Los account_ids '409000438620' y '1196428' son los que parecen tener más picos anomalos.           
+        **`Análisis de Conteo Total de Transacciones Diarias`**:
+        - La gráfica muestra una **tendencia general de aumento** en la **cantidad de transacciones diarias** a lo largo del tiempo, especialmente a partir de **mediados de 2016**. Este crecimiento podría indicar un **incremento en la actividad de los usuarios** o en la **adopción de los servicios** a lo largo del periodo analizado.
+        - Se observan varios **picos pronunciados** en la cantidad de transacciones, especialmente entre **2017 y 2018**. Estos picos podrían estar asociados a **eventos específicos, promociones, campañas comerciales**, o **comportamientos anómalos** que podrían requerir un **análisis adicional** para identificar sus causas.
+        - Desde **2015 hasta mediados de 2016**, la actividad de transacciones parece **más estable** y con un **volumen relativamente bajo**, lo que podría reflejar una **etapa temprana o más controlada** del sistema.
+        - Se recomienda realizar un **análisis de causalidad** para identificar si ciertos **eventos, políticas o promociones** están directamente relacionados con los **aumentos o disminuciones** en la actividad de las transacciones.
+        - Los **account_ids '409000438620' y '1196428'** son los que parecen tener **más picos anómalos**.
 
-                        **Análisis de Tendencia Diaria de Depósitos y Retiros con Indicadores de Promedio**:
-                        - La gráfica muestra que el promedio diario de retiros (withdrawal_amt) es de 185.7B, mientras que el promedio diario de depósitos (deposit_amt) es de 184.3B. Esta diferencia indica que, en general, los retiros superan a los depósitos, lo cual es un factor clave que podría estar contribuyendo a los balances negativos observados en las cuentas. Este comportamiento sugiere que la salida de fondos es más alta que la entrada, lo cual puede tener implicaciones importantes sobre la salud financiera general de los usuarios o la operación del sistema.
-         
-                        """
+        **`Análisis de Tendencia Diaria de Depósitos y Retiros con Indicadores de Promedio`**:
+        - La gráfica muestra que el **promedio diario de retiros (withdrawal_amt)** es de **185.7B**, mientras que el **promedio diario de depósitos (deposit_amt)** es de **184.3B**. Esta diferencia indica que, en general, los **retiros superan a los depósitos**, lo cual es un factor clave que podría estar contribuyendo a los **balances negativos** observados en las cuentas. Este comportamiento sugiere que la **salida de fondos es más alta que la entrada**.
+        """
+
         # Mostrar las conclusiones en Streamlit
         st.markdown(conclusiones_fechas_transaccion)
 
+        ############################################################################################
+        ###############6. Tareas de Machine Learning Propuestas:
+        ############################################################################################
+        st.header("6. Tareas de Machine Learning Propuestas")
+        tareas_ml_propuestas = """
+                        1. **`Modelo de Clasificación para la Segmentación de Clientes`**: Segmentar a los usuarios en grupos con comportamientos financieros similares (ej. ahorradores, gastadores, deudores), permitiendo personalizar ofertas y servicios, optimizando la estrategia de retención y satisfacción del cliente. **Modelos Sugeridos**: Algoritmos de clustering como K-Means o DBSCAN, o clasificación supervisada utilizando Random Forest.
+
+                        2. **`Modelos Predictivos de Riesgo de Crédito`**: Predecir el riesgo de que un cliente incurra en un saldo negativo o en un incumplimiento de pagos futuros, ayudando a implementar medidas preventivas como alertas de balance bajo, límites de retiro, o sugerencias de ahorro. **Modelos Sugeridos**: Regresión logística o modelos de redes neuronales.
+
+                        3. **`Análisis de Anomalías para Detección de Fraudes`**: Detectar patrones de transacciones atípicas que podrían indicar fraudes o actividades sospechosas, mejorando la seguridad financiera y reduciendo pérdidas asociadas a actividades fraudulentas. **Modelos Sugeridos**: Isolation Forest o técnicas de análisis de series temporales como Prophet.
+
+                        4. **`Predicción de Categorías de Transacciones`**: Automatizar la clasificación de las transacciones en categorías específicas utilizando NLP (Procesamiento de Lenguaje Natural), mejorando la exactitud de la categorización de gastos e ingresos y permitiendo un análisis financiero más detallado. **Modelos Sugeridos**: Modelos de clasificación basados en NLP.
+
+                        """
+        # Mostrar las conclusiones en Streamlit
+        st.markdown(tareas_ml_propuestas)
+        
     elif st.session_state.selected_main == "Deseable":
         menu_options = st.radio(
             "Opciones de Deseable",
