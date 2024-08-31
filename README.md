@@ -7,13 +7,6 @@
 
 CategorifAI es un proyecto desarrollado para el desafío de Mercado Libre. La aplicación está diseñada para realizar un análisis técnico de datos y ofrecer insights mediante la implementación de modelos de Machine Learning.
 
-## Características
-
-- **Data QA**: Evaluación de la calidad del dataset y propuestas de corrección.
-- **Reporting**: Documentación de resultados, insights y conclusiones soportados por gráficos y métricas.
-- **Modelos Predictivos**: Explicación de posibles tareas de Machine Learning valiosas para el dominio del dataset.
-- **Manejo de Environment**: Uso de entornos virtuales para un entorno de desarrollo consistente.
-
 ## Requisitos de Instalación
 
 Para ejecutar este proyecto, asegúrate de tener instalados los siguientes software:
