@@ -31,17 +31,21 @@ Para ejecutar este proyecto, asegúrate de tener instalados los siguientes softw
 2. Crea y activa un entorno virtual:
 
 En Windows:
+    ```bash
     python -m venv venv
     .\venv\Scripts\activate
 
 En macOS/Linux:
+    ```bash    
     python3 -m venv venv
     source venv/bin/activate
 
 3. Instala las dependencias:
+    ```bash    
     pip install -r requirements.txt
 
 4. Ejecuta la aplicación:
+    ```bash    
     streamlit run app.py
 
 ### Contacto
