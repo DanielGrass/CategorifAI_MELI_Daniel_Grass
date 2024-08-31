@@ -221,10 +221,10 @@ if st.session_state.selected_main:
         st.markdown(tareas_ml_propuestas)
         
     elif st.session_state.selected_main == "Deseable":
-        st.header("Tareas requeridas")
+        st.header("Tareas deseadas:")
         st.write("**`Versionado de Código`**: Versionado de código con Git (incluso puede publicarse en tu cuenta personal de GitHub).")        
         st.write("**`Feature Engineering`**: Indicar y calcular posibles candidatos de features que podrían utilizarse tanto columnas originales y transformaciones.")
-        st.write("**`Modelo Predictivo`**: Realice un modelo predictivo.**)")
+        st.write("**`Modelo Predictivo`**: Realice un modelo predictivo.")
         st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")        
         st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
         st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
