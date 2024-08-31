@@ -242,7 +242,7 @@ if st.session_state.selected_main:
         st.header("2.2 Mostrar Skills en Python")
         st.markdown(
             """
-            **`Respuesta:`**: Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
+            Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
 
             1. **Organización del Código**: El código está estructurado en módulos claros y separados, lo que facilita la comprensión, el mantenimiento y la escalabilidad del proyecto. Se siguen convenciones de nombres y se utiliza la modularidad para organizar funciones y componentes de manera eficiente.
 
@@ -253,12 +253,6 @@ if st.session_state.selected_main:
             4. **Buenas Prácticas de Versionado de Código**: El uso de Git y GitHub para el control de versiones asegura un seguimiento detallado de los cambios, facilitando la colaboración y manteniendo un historial limpio y organizado del desarrollo del proyecto.
 
             5. **Estilo de Código Consistente**: Se sigue la convención de estilo PEP 8 de Python, lo que garantiza un código limpio, legible y profesional. Esto incluye la consistencia en la indentación, el uso adecuado de espacios, nombres de variables descriptivos y un enfoque general que favorece la mantenibilidad.
-
-            6. **Uso de Librerías Populares y Eficientes**: El proyecto emplea librerías avanzadas como `pandas`, `numpy`, `plotly` y `streamlit`, lo que muestra habilidades en la utilización de herramientas robustas y eficientes para la manipulación de datos, visualización y desarrollo de aplicaciones interactivas.
-
-            7. **Manejo de Errores y Validaciones**: Se han implementado controles y validaciones en la carga y manipulación de datos, lo que muestra una atención al detalle y una estrategia proactiva para evitar fallos durante la ejecución del programa.
-
-            Estas prácticas no solo demuestran habilidades técnicas avanzadas en Python, sino también una dedicación a la escritura de código de calidad que es fácil de entender y reutilizar, destacando la capacidad de estructurar y documentar proyectos de manera profesional.
 
             """
         )
