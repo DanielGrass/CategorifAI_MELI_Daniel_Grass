@@ -1,6 +1,6 @@
 import streamlit as st
 from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
-from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal
+from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal, analysis_datetime_variables, analysis_withdrawal_deposit
 from data.data_loader import load_local_parquet
 import pandas as pd
 import numpy as np
@@ -179,74 +179,29 @@ if st.session_state.selected_main:
         st.markdown(conclusiones_variables_continuas)
 
                      
-       ############################################################################################
-       ###############5. Análisis de Fechas de Transacción y Finalización:
-       ############################################################################################
+        ############################################################################################
+        ###############5. Análisis de Fechas de Transacción y Finalización:
+        ############################################################################################
         st.header("5. Análisis de Fechas de Transacción y Finalización")
     
-       # Filtrar los registros donde value_date < date
-        incorrect_dates = df[df['value_date'] < df['date']]
+        analysis_datetime_variables(df)
+        analysis_withdrawal_deposit(df)
+        conclusiones_fechas_transaccion = """
+                        ### Conclusiones de Análisis de Fechas de Transacción y Finalización
 
-        # Contar la cantidad de registros incorrectos
-        num_incorrect = incorrect_dates.shape[0]
-        total_records = df.shape[0]
-        percentage_incorrect = (num_incorrect / total_records) * 100
+                        **Análisis de Conteo Total de Transacciones Diarias**:
+                        - La gráfica muestra una tendencia general de aumento en la cantidad de transacciones diarias a lo largo del tiempo, especialmente a partir de mediados de 2016. Este crecimiento podría indicar un incremento en la actividad de los usuarios o en la adopción de los servicios a lo largo del periodo analizado.                        
+                        - Se observan varios picos pronunciados en la cantidad de transacciones, especialmente entre 2017 y 2018. Estos picos podrían estar asociados a eventos específicos, promociones, campañas comerciales, o comportamientos anómalos que podrían requerir un análisis adicional para identificar sus causas.                        
+                        - Desde 2015 hasta mediados de 2016, la actividad de transacciones parece más estable y con un volumen relativamente bajo, lo que podría reflejar una etapa temprana o más controlada del sistema.
+                        - Se recomienda realizar un análisis de causalidad para identificar si ciertos eventos, políticas o promociones están directamente relacionados con los aumentos o disminuciones en la actividad de las transacciones.    
+                        - Los account_ids '409000438620' y '1196428' son los que parecen tener más picos anomalos.           
 
-       
-        st.write(
-            f"Se encontraron **{num_incorrect}** registros donde `value_date` es anterior a `date`, "
-            f"lo cual representa el **{percentage_incorrect:.2f}%** del total de registros. Es decir que la feha de finalización es menor a la de registro."
-        )
-
-        # Convertir las columnas de fecha a formato datetime si no lo están
-        df['date'] = pd.to_datetime(df['date'])
-        df['value_date'] = pd.to_datetime(df['value_date'])
-        
-        # Crear un DataFrame de conteo de transacciones por día sin separar por usuario
-        df_daily_count = df.groupby('date').size().reset_index(name='total_transactions')
-
-        # Gráfico de series de tiempo con el total de transacciones por día
-        fig = px.line(
-            df_daily_count, 
-            x='date', 
-            y='total_transactions', 
-            title="Conteo Total de Transacciones Diarias",
-            labels={'total_transactions': 'Cantidad de Transacciones', 'date': 'Fecha'},
-            markers=True
-        )
-
-        # Mostrar el gráfico
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Crear un DataFrame de conteo de transacciones por día y account_id
-        df_count = df.groupby(['date', 'account_id']).size().reset_index(name='transaction_count')
-
-        # Obtener la lista de account_id únicos para el selector
-        account_ids = df['account_id'].unique()
-
-        # Selector de múltiples account_id
-        selected_ids = st.multiselect("Selecciona uno o varios Account ID:", account_ids, default=account_ids)
-
-        # Filtrar el DataFrame con los account_id seleccionados
-        filtered_df = df_count[df_count['account_id'].isin(selected_ids)]
-
-        # Gráfico de series de tiempo
-        fig = px.line(
-            filtered_df, 
-            x='date', 
-            y='transaction_count', 
-            color='account_id', 
-            title="Conteo de Transacciones Diarias",
-            labels={'transaction_count': 'Cantidad de Transacciones', 'date': 'Fecha'},
-            markers=True
-        )
-
-        # Mostrar el gráfico si hay al menos un account_id seleccionado
-        if selected_ids:
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Selecciona uno o varios Account ID para visualizar los datos.")
-
+                        **Análisis de Tendencia Diaria de Depósitos y Retiros con Indicadores de Promedio**:
+                        - La gráfica muestra que el promedio diario de retiros (withdrawal_amt) es de 185.7B, mientras que el promedio diario de depósitos (deposit_amt) es de 184.3B. Esta diferencia indica que, en general, los retiros superan a los depósitos, lo cual es un factor clave que podría estar contribuyendo a los balances negativos observados en las cuentas. Este comportamiento sugiere que la salida de fondos es más alta que la entrada, lo cual puede tener implicaciones importantes sobre la salud financiera general de los usuarios o la operación del sistema.
+         
+                        """
+        # Mostrar las conclusiones en Streamlit
+        st.markdown(conclusiones_fechas_transaccion)
 
     elif st.session_state.selected_main == "Deseable":
         menu_options = st.radio(

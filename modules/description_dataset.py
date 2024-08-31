@@ -167,3 +167,131 @@ def plot_distribution_with_outlier_removal(column, df):
     st.pyplot(fig)  # Mostrar el gráfico en Streamlit
 
     
+def analysis_datetime_variables(df):
+     # Filtrar los registros donde value_date < date
+        incorrect_dates = df[df['value_date'] < df['date']]
+
+        # Contar la cantidad de registros incorrectos
+        num_incorrect = incorrect_dates.shape[0]
+        total_records = df.shape[0]
+        percentage_incorrect = (num_incorrect / total_records) * 100
+
+       
+        st.write(
+            f"Se encontraron **{num_incorrect}** registros donde `value_date` es anterior a `date`, "
+            f"lo cual representa el **{percentage_incorrect:.2f}%** del total de registros. Es decir que la feha de finalización es menor a la de registro."
+        )
+
+        # Convertir las columnas de fecha a formato datetime si no lo están
+        df['date'] = pd.to_datetime(df['date'])
+        df['value_date'] = pd.to_datetime(df['value_date'])
+        
+        # Crear un DataFrame de conteo de transacciones por día sin separar por usuario
+        df_daily_count = df.groupby('date').size().reset_index(name='total_transactions')
+
+        # Gráfico de series de tiempo con el total de transacciones por día
+        fig = px.line(
+            df_daily_count, 
+            x='date', 
+            y='total_transactions', 
+            title="Conteo Total de Transacciones Diarias",
+            labels={'total_transactions': 'Cantidad de Transacciones', 'date': 'Fecha'},
+            markers=True
+        )
+
+        # Mostrar el gráfico
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Crear un DataFrame de conteo de transacciones por día y account_id
+        @st.cache_data  # Add the caching decorator
+        def load_data_group_by(df):
+            df = df.groupby(['date', 'account_id']).size().reset_index(name='transaction_count')
+            return df
+        df_count = load_data_group_by(df)
+
+        # Obtener la lista de account_id únicos para el selector
+        account_ids = df['account_id'].unique()
+
+        # Selector de múltiples account_id
+        selected_ids = st.multiselect("Selecciona uno o varios Account ID:", account_ids, default=account_ids)
+
+        # Filtrar el DataFrame con los account_id seleccionados
+        filtered_df = df_count[df_count['account_id'].isin(selected_ids)]
+
+        # Gráfico de series de tiempo
+        fig = px.line(
+            filtered_df, 
+            x='date', 
+            y='transaction_count', 
+            color='account_id', 
+            title="Conteo de Transacciones Diarias",
+            labels={'transaction_count': 'Cantidad de Transacciones', 'date': 'Fecha'},
+            markers=True
+        )
+
+        # Mostrar el gráfico si hay al menos un account_id seleccionado
+        if selected_ids:
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Selecciona uno o varios Account ID para visualizar los datos.")
+
+def analysis_withdrawal_deposit(df):
+    # Calcular los totales diarios de withdrawal_amt y deposit_amt
+    df_totals = df.groupby('date').agg(
+        total_withdrawal=('withdrawal_amt', 'sum'),
+        total_deposit=('deposit_amt', 'sum')
+    ).reset_index()
+
+    # Calcular los promedios de withdrawal_amt y deposit_amt
+    avg_withdrawal = -df_totals['total_withdrawal'].mean()  # Negativo para representar correctamente en la gráfica
+    avg_deposit = df_totals['total_deposit'].mean()
+
+    # Crear la figura con Plotly
+    fig = go.Figure()
+
+    # Añadir barras de withdrawal_amt (como negativos)
+    fig.add_trace(go.Bar(
+        x=df_totals['date'],
+        y=-df_totals['total_withdrawal'],  # Se muestran como negativos
+        name='Total Withdrawal (Negativo)',
+        marker_color='red'
+    ))
+
+    # Añadir barras de deposit_amt
+    fig.add_trace(go.Bar(
+        x=df_totals['date'],
+        y=df_totals['total_deposit'],
+        name='Total Deposit',
+        marker_color='green'
+    ))
+
+    # Añadir la línea de promedio de withdrawal_amt (negativo)
+    fig.add_trace(go.Scatter(
+        x=df_totals['date'],
+        y=[avg_withdrawal] * len(df_totals),
+        mode='lines',
+        name='Promedio Withdrawal (Negativo)',
+        line=dict(color='red', dash='dash')
+    ))
+
+    # Añadir la línea de promedio de deposit_amt
+    fig.add_trace(go.Scatter(
+        x=df_totals['date'],
+        y=[avg_deposit] * len(df_totals),
+        mode='lines',
+        name='Promedio Deposit',
+        line=dict(color='green', dash='dash')
+    ))
+
+    # Configurar el diseño del gráfico
+    fig.update_layout(
+        title="Tendencia Diaria de Depósitos y Retiros con Indicadores de Promedio",
+        xaxis_title="Fecha",
+        yaxis_title="Monto",
+        barmode='relative',
+        showlegend=True,
+        template='plotly_dark' if st.session_state.dark_mode else 'plotly_white'
+    )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)    

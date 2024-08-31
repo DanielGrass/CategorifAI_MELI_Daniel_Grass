@@ -4,7 +4,7 @@ import streamlit as st
 # Inicializar el estado del tema
 def initialize_theme():
     if 'dark_mode' not in st.session_state:
-        st.session_state.dark_mode = False
+        st.session_state.dark_mode = True  # Por defecto, inicia en modo claro
 
 # Función para alternar el tema
 def toggle_theme():
@@ -42,9 +42,8 @@ def apply_styles():
                 color: #ffffff; /* Estilo del texto de los radio buttons en modo oscuro */
             }
             .stAlert {
-                background-color: #2e2e2e !important;  /* Fondo oscuro para alertas */
-                color: #ffa500 !important;  /* Color de texto de alta visibilidad para alertas en modo oscuro */
-                border-left: 4px solid #ffa500 !important;
+                background-color: #2c2c2c;
+                color: #ffffff;
             }
             </style>
             """,
@@ -80,9 +79,8 @@ def apply_styles():
                 color: #003087; /* Estilo del texto de los radio buttons en modo claro */
             }
             .stAlert {
-                background-color: #d3d3d3 !important;  /* Fondo gris para alertas */
-                color: #000000 !important;  /* Color de texto negro para alertas en modo claro */
-                border-left: 4px solid #ffa500 !important;
+                background-color: #e0e0e0;
+                color: #003087;
             }
             </style>
             """,
