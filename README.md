@@ -30,12 +30,14 @@ Para ejecutar este proyecto, asegúrate de tener instalados los siguientes softw
 
 2. Crea y activa un entorno virtual:
 
-En Windows:
+- En Windows:
+
     ```bash
     python -m venv venv
     .\venv\Scripts\activate
 
-En macOS/Linux:
+- En macOS/Linux:
+
     ```bash    
     python3 -m venv venv
     source venv/bin/activate
