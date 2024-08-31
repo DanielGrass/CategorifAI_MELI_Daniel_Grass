@@ -1,5 +1,6 @@
 # CategorifAI - MELI Challenge by Daniel Grass
-
+## Take Home: Financial Transactions
+## Agosto 2024
 ![Logo de CategorifAI](https://http2.mlstatic.com/frontend-assets/ml-web-navigation/ui-navigation/6.6.73/mercadolibre/logo_large_25years@2x.png?width=300)
 
 ## Descripción

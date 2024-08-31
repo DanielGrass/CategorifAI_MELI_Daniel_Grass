@@ -43,6 +43,7 @@ with st.sidebar:
 
 # Menú horizontal a la derecha basado en la selección
 st.title("Data Science Technical Challenge - CategorifAI")
+st.title("Take Home: Financial Transactions")
 st.subheader("Presentado por: Daniel Grass")
 
 # Cargael archivo .parquet usando la función cacheada
