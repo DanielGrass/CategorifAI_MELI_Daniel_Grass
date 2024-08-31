@@ -41,6 +41,11 @@ def apply_styles():
             .stRadio div {
                 color: #ffffff; /* Estilo del texto de los radio buttons en modo oscuro */
             }
+            .stAlert {
+                background-color: #2e2e2e !important;  /* Fondo oscuro para alertas */
+                color: #ffa500 !important;  /* Color de texto de alta visibilidad para alertas en modo oscuro */
+                border-left: 4px solid #ffa500 !important;
+            }
             </style>
             """,
             unsafe_allow_html=True
@@ -73,6 +78,11 @@ def apply_styles():
             }
             .stRadio div {
                 color: #003087; /* Estilo del texto de los radio buttons en modo claro */
+            }
+            .stAlert {
+                background-color: #d3d3d3 !important;  /* Fondo gris para alertas */
+                color: #000000 !important;  /* Color de texto negro para alertas en modo claro */
+                border-left: 4px solid #ffa500 !important;
             }
             </style>
             """,

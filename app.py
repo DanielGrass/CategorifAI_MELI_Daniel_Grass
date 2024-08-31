@@ -1,11 +1,10 @@
 import streamlit as st
 from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
-from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto
+from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal
 from data.data_loader import load_local_parquet
 import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-from fitter import Fitter, get_common_distributions
+import numpy as np
+import plotly.express as px
 
 # Inicializar el estado del tema
 initialize_theme()
@@ -63,17 +62,23 @@ if st.session_state.selected_main:
         # Mostrar la Descripción de las Columnas del Dataset
         st.header("Descripción de las Columnas del Dataset")
         description_dataset()
-
+        
+        ##################################################################################
+        ###############1. Imprimir los datos originales del archivo Parquet proporcionado.
+        ##################################################################################
         st.header("1. Imprimir los datos originales del archivo Parquet proporcionado.")
         if df is not None:
             st.write(df)  # Muestra el DataFrame en Streamlit
 
-        
-        # Análisis de tipos de datos y valores nulos
+        ##################################################################################
+        ###############2. Análisis de tipos de datos y valores nulos
+        ##################################################################################
         st.header("2. Análisis de tipos de datos y valores nulos")        
         null_analysis(df)
 
-        # Análisis Categórico:
+        ##################################################################################
+        ###############3. Análisis Categórico:
+        ##################################################################################
         st.header("3. Análisis Categórico:")
         
         # Análisis de la columna `category`
@@ -111,20 +116,137 @@ if st.session_state.selected_main:
         # Mostrar el texto en Streamlit
         st.markdown(conclusiones_categorico)
 
+        ############################################################################################
+        ###############4. Análisis variables continuas (Distribuciones y tratamiento de anomalos):
+        ############################################################################################
+        st.header("4. Análisis variables continuas (Distribuciones y tratamiento de anomalos:")
 
+        numerical_columns = ['withdrawal_amt', 'deposit_amt', 'balance_amt']
+        # Visualización de cada variable continua antes y después de remover outliers
+        for col in numerical_columns:
+            plot_distribution_with_outlier_removal(col, df)
+        
+    
 
-        # Asegúrate de que las columnas son datetime (aunque ya lo son, es una verificación adicional)
-        df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        df['value_date'] = pd.to_datetime(df['value_date'], errors='coerce')
+        conclusiones_variables_continuas = """
+                        ### Conclusiones de Análisis variables continuas (Distribuciones y tratamiento de anomalos
 
-        # Calcular la diferencia en segundos entre 'value_date' y 'date'
-        df['time_difference_seconds'] = (df['value_date'] - df['date']).dt.total_seconds()
+                        **Análisis de `withdrawal_amt`**:
 
-        # Mostrar el resultado
-        st.write("Diferencia en segundos entre 'value_date' y 'date':")
-        st.write(df[['date', 'value_date', 'time_difference_seconds']])
+                        - El histograma de withdrawal_amt muestra que aproximadamente el 80% de los registros se encuentran en el rango de [0 - 10M]. Esto sugiere una alta concentración de transacciones de retiro en valores bajos a moderados, lo cual es típico en escenarios donde la mayoría de los usuarios realizan transacciones pequeñas o medianas.
+                        - Se detecta un valor máximo significativo de 459M, indicando la presencia de outliers que pueden distorsionar la interpretación de los datos y afectar los análisis estadísticos.
+                        - Después de eliminar los outliers utilizando el rango intercuartílico (IQR), los datos se ajustan al rango [0 - 12M], con una concentración predominante en el intervalo [0 - 250k]. En este rango se encuentran 30,958 de los 53,549 registros totales, lo que refuerza que la mayoría de las transacciones están en valores relativamente bajos.
+                        - Se utilizó Fitter para identificar la mejor distribución teórica que se ajusta a los datos sin outliers, resultando en la distribución Johnson SB como la más adecuada. Esta distribución es conocida por su flexibilidad en modelar datos asimétricos y con colas largas.
+                        - Es crucial realizar pruebas de hipótesis, como la de Kolmogorov-Smirnov, para validar si la distribución ajustada se adapta adecuadamente a los datos. Este paso permitirá confirmar si el modelo teórico es estadísticamente significativo o si se requiere un ajuste adicional.
+                        
+                        **Análisis de `deposit_amt`**:
+
+                        - El histograma de deposit_amt muestra que aproximadamente el 81% de los registros se concentran en el rango [0 - 10M]. Al igual que en withdrawal_amt, esto sugiere que la mayoría de las transacciones de depósito son pequeñas, con una alta frecuencia en los valores bajos.
+                        - Al eliminar los outliers mediante el IQR, los datos se ajustan al rango [0 - 11.7M], con una concentración notable en el rango [0 - 250k]. Este grupo comprende 26,146 de los 62,652 registros, evidenciando que las transacciones más frecuentes son de montos menores.
+                        - El análisis con Fitter identificó que la Lognormal es la distribución que mejor se ajusta a los datos sin outliers. Esta distribución es común en datos financieros donde los valores son positivos y presentan una asimetría hacia la derecha, como es el caso de las transacciones monetarias.
+                        - Al igual que con withdrawal_amt, es fundamental validar el ajuste con pruebas de hipótesis como Kolmogorov-Smirnov para asegurar que la Lognormal representa adecuadamente los datos y no se deben considerar otras distribuciones.
+
+                       **Análisis de `balance_amt`**:
+
+                        - El análisis del histograma de balance_amt revela que aproximadamente el 97.5% de los registros tienen un balance negativo, mientras que solo el 2.5% de los registros muestran un balance positivo. Esta distribución indica que la mayoría de las cuentas están en déficit, lo cual podría reflejar un comportamiento común de los usuarios o posibles inconsistencias en los datos de las transacciones.
+                        - Adicionalmente, se identificó que únicamente 2 usuarios presentan balances positivos en sus cuentas, lo que sugiere que la situación financiera general de los usuarios es predominantemente negativa.
+                        - Es recomendable ajustar el formato de las fechas en value_date y date para incluir horas y minutos. Esto permitirá un análisis más detallado de la cronología de las transacciones y una posible reconstrucción precisa de los balances.
+
+                        **Segregación por Segmentos**:
+
+                        - Se recomienda evaluar la posibilidad de segmentar los datos por categorías adicionales, como tipo de cliente, periodo o monto. Esto permitiría identificar patrones más específicos que podrían mejorar la toma de decisiones basada en los datos.
+                        """
+        ## Validar comportamiento balance_amt
+        # Mensaje para la cantidad de registros con balance menor a 0
+        total_negative_balances = df["balance_amt"][df["balance_amt"] < 0].count()
+        percentage_negative_balances = np.round((total_negative_balances / df["balance_amt"].count()) * 100, 2)
+        text_warning_balance_amt = (
+            f"⚠️ **Cantidad de registros con balance negativo:** {total_negative_balances} registros, "
+            f"representando el {percentage_negative_balances}% del total."
+        )
+        st.error(text_warning_balance_amt)
+
+        # Mensaje para la cantidad de usuarios con balance menor a 0
+        total_negative_accounts = df["account_id"][df["balance_amt"] < 0].nunique()
+        percentage_negative_accounts = np.round((total_negative_accounts / df["account_id"].nunique()) * 100, 2)
+        text_warning_account_id = (
+            f"⚠️ **Cantidad de usuarios con balance negativo:** {total_negative_accounts} usuarios, "
+            f"representando el {percentage_negative_accounts}% de todos los usuarios."
+        )
+        st.error(text_warning_account_id)
+
+        # Mostrar las conclusiones en Streamlit
+        st.markdown(conclusiones_variables_continuas)
+
                      
+       ############################################################################################
+       ###############5. Análisis de Fechas de Transacción y Finalización:
+       ############################################################################################
+        st.header("5. Análisis de Fechas de Transacción y Finalización")
+    
+       # Filtrar los registros donde value_date < date
+        incorrect_dates = df[df['value_date'] < df['date']]
+
+        # Contar la cantidad de registros incorrectos
+        num_incorrect = incorrect_dates.shape[0]
+        total_records = df.shape[0]
+        percentage_incorrect = (num_incorrect / total_records) * 100
+
        
+        st.write(
+            f"Se encontraron **{num_incorrect}** registros donde `value_date` es anterior a `date`, "
+            f"lo cual representa el **{percentage_incorrect:.2f}%** del total de registros. Es decir que la feha de finalización es menor a la de registro."
+        )
+
+        # Convertir las columnas de fecha a formato datetime si no lo están
+        df['date'] = pd.to_datetime(df['date'])
+        df['value_date'] = pd.to_datetime(df['value_date'])
+        
+        # Crear un DataFrame de conteo de transacciones por día sin separar por usuario
+        df_daily_count = df.groupby('date').size().reset_index(name='total_transactions')
+
+        # Gráfico de series de tiempo con el total de transacciones por día
+        fig = px.line(
+            df_daily_count, 
+            x='date', 
+            y='total_transactions', 
+            title="Conteo Total de Transacciones Diarias",
+            labels={'total_transactions': 'Cantidad de Transacciones', 'date': 'Fecha'},
+            markers=True
+        )
+
+        # Mostrar el gráfico
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Crear un DataFrame de conteo de transacciones por día y account_id
+        df_count = df.groupby(['date', 'account_id']).size().reset_index(name='transaction_count')
+
+        # Obtener la lista de account_id únicos para el selector
+        account_ids = df['account_id'].unique()
+
+        # Selector de múltiples account_id
+        selected_ids = st.multiselect("Selecciona uno o varios Account ID:", account_ids, default=account_ids)
+
+        # Filtrar el DataFrame con los account_id seleccionados
+        filtered_df = df_count[df_count['account_id'].isin(selected_ids)]
+
+        # Gráfico de series de tiempo
+        fig = px.line(
+            filtered_df, 
+            x='date', 
+            y='transaction_count', 
+            color='account_id', 
+            title="Conteo de Transacciones Diarias",
+            labels={'transaction_count': 'Cantidad de Transacciones', 'date': 'Fecha'},
+            markers=True
+        )
+
+        # Mostrar el gráfico si hay al menos un account_id seleccionado
+        if selected_ids:
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Selecciona uno o varios Account ID para visualizar los datos.")
+
 
     elif st.session_state.selected_main == "Deseable":
         menu_options = st.radio(

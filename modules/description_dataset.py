@@ -1,6 +1,9 @@
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
+from fitter import Fitter, get_common_distributions
+import plotly.express as px
+import matplotlib.pyplot as plt
 
 def description_dataset():
     metadata={
@@ -120,3 +123,47 @@ def plot_categorical_distribution_with_pareto(column_name, data, color):
             st.plotly_chart(fig)
 
 
+# Función para visualizar las distribuciones antes y después de eliminar outliers
+def plot_distribution_with_outlier_removal(column, df):
+    st.subheader(f"Análisis de `{column}`")
+
+    # Visualización inicial de la distribución
+    st.write("### Distribución Original")
+    fig_hist = px.histogram(df, x=column, nbins=50, title=f"Histograma de {column} (Original)", marginal="box")
+    st.plotly_chart(fig_hist)
+
+
+    # Cálculo del IQR para detectar y remover outliers
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    df_no_outliers = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+    # Visualización de la distribución sin outliers
+    st.write("### Distribución sin Outliers")
+    fig_hist_no_outliers = px.histogram(df_no_outliers, x=column, nbins=50, title=f"Histograma de {column} (Sin Outliers)", marginal="box")
+    st.plotly_chart(fig_hist_no_outliers)
+
+    # Análisis de ajuste de distribuciones con Fitter en datos sin outliers
+    st.write("### Ajuste de Distribuciones con Fitter")
+   
+    # Crear el objeto Fitter con las distribuciones seleccionadas
+    f = Fitter(df_no_outliers[column].dropna(), distributions=[
+        'expon', 'norm', 'johnsonsb', 'lognorm', 'uniform'
+    ])
+    
+    # Ajustar las distribuciones
+    f.fit()
+    best_fit = f.get_best(method='sumsquare_error')
+
+    # Mostrar el mejor ajuste encontrado
+    st.write(f"Mejor ajuste para `{column}`: {list(best_fit.keys())[0]}")
+
+    # Mostrar el resumen de los ajustes sin argumento 'ax'
+    fig = plt.figure(figsize=(10, 5))
+    f.summary()  # Generar y mostrar el gráfico del ajuste
+    st.pyplot(fig)  # Mostrar el gráfico en Streamlit
+
+    
