@@ -1,5 +1,11 @@
 import streamlit as st
-from modules.theme_toggle import initialize_theme,toggle_theme, apply_styles
+from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
+from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto
+from data.data_loader import load_local_parquet
+import pandas as pd
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from fitter import Fitter, get_common_distributions
 
 # Inicializar el estado del tema
 initialize_theme()
@@ -39,30 +45,86 @@ with st.sidebar:
 # Menú horizontal a la derecha basado en la selección
 st.title("Data Science Technical Challenge - CategorifAI")
 st.subheader("Presentado por: Daniel Grass")
+
+# Cargael archivo .parquet usando la función cacheada
+df = load_local_parquet()
+
+
 if st.session_state.selected_main:
-
-
     # Mostrar un menú horizontal según la selección del botón principal
     if st.session_state.selected_main == "Requerido":
-        menu_options = st.radio(
-            "Opciones de Requerido",
-            options=["Data QA", "Reporting", "Machine Learning"],
-            horizontal=True
-        )
+        st.header("Tareas requeridas")
+        st.write("**`Data QA`**: Se debe chequear la calidad del dataset para hacer una evaluación de qué tan apropiados son los datos para tareas de Data Science. Proponga un conjunto de correcciones en los datos de ser necesario.")
+        st.write("**`Reporting`**: Documente los resultados e insights obtenidos durante la exploración y describa conclusiones desde una perspectiva de negocio, soportado por gráficos / tablas / métricas.")
+        st.write("**`Machine Learning`**: Describa las posibles tareas de Machine Learning que podrían realizarse desde el dataset dado, que podrían ser valiosas en el dominio dado (sólo explicar, **no entrenar un modelo**)")
+        
+       
 
-        # Mostrar el contenido correspondiente
-        if menu_options == "Data QA":
-            st.header("Data QA")
-            st.write("Se debe chequear la calidad del dataset para hacer una evaluación de qué tan apropiados son los datos para tareas de Data Science.")
-            st.write("Proponga un conjunto de correcciones en los datos de ser necesario.")
+        # Mostrar la Descripción de las Columnas del Dataset
+        st.header("Descripción de las Columnas del Dataset")
+        description_dataset()
 
-        elif menu_options == "Reporting":
-            st.header("Reporting")
-            st.write("Documente los resultados e insights obtenidos durante la exploración y describa conclusiones desde una perspectiva de negocio, soportado por gráficos, tablas, y métricas.")
+        st.header("1. Imprimir los datos originales del archivo Parquet proporcionado.")
+        if df is not None:
+            st.write(df)  # Muestra el DataFrame en Streamlit
 
-        elif menu_options == "Machine Learning":
-            st.header("Machine Learning")
-            st.write("Describa las posibles tareas de Machine Learning que podrían realizarse desde el dataset dado, que podrían ser valiosas en el dominio dado (sólo explicar, no entrenar un modelo).")
+        
+        # Análisis de tipos de datos y valores nulos
+        st.header("2. Análisis de tipos de datos y valores nulos")        
+        null_analysis(df)
+
+        # Análisis Categórico:
+        st.header("3. Análisis Categórico:")
+        
+        # Análisis de la columna `category`
+        st.subheader("Distribución de `category`")
+        plot_categorical_distribution_with_pareto('category', df, color='skyblue')
+
+        # Análisis de la columna `city`
+        st.subheader("Distribución de `city`")
+        plot_categorical_distribution_with_pareto('city', df, color='orange')
+
+        # Análisis de la columna `device`
+        st.subheader("Distribución de `device`")
+        plot_categorical_distribution_with_pareto('device', df, color='purple')
+
+        # Análisis de la columna `transaction_details`
+        st.subheader("Distribución de `account_id`")
+        plot_categorical_distribution_with_pareto('account_id', df, color='pink')
+       
+        st.subheader("Conclusiones del Análisis Categórico:")
+        conclusiones_categorico = """       
+
+        1. **Distribución de `Category`**:
+        - El análisis de la variable `Category` revela que una gran mayoría de las transacciones (96.53%) se concentran en solo cuatro categorías: **Miscellaneous**, **Transfer**, **Investment**, y **Subscriptions**. Esto sugiere que la actividad financiera de los usuarios está altamente centralizada en estas áreas, lo que podría indicar patrones específicos de uso o falta de diversificación en las clasificaciones de las transacciones. Es crucial explorar estas categorías más a fondo para identificar si esta centralización responde a necesidades específicas de los usuarios o si podría beneficiarse de una reclasificación más detallada.
+
+        2. **Distribución de `City` y `Device`**:
+        - Las variables `City` y `Device` presentan una distribución más uniforme, donde cada categoría muestra una participación similar. Esto indica que no hay una fuerte dependencia de la transacción en función de la ubicación geográfica o el tipo de dispositivo utilizado. Esta distribución homogénea sugiere que las transacciones se distribuyen equitativamente entre las ciudades y los dispositivos, reflejando un comportamiento de usuario relativamente constante sin sesgos significativos hacia un tipo de dispositivo o una ciudad específica. Este patrón uniforme podría implicar que no hay una necesidad urgente de segmentar estrategias por ubicación o tipo de dispositivo en este momento.
+        
+        3. **Distribución de `account_id`**:
+        -  Un pequeño grupo de cuentas domina la mayoría de las transacciones. Las primeras dos cuentas concentran una gran proporción de la actividad total (67.65%), sugiriendo usuarios muy activos. Esto ofrece una oportunidad para analizar el comportamiento de los usuarios, identificando patrones que podrían guiar estrategias de segmentación y retención como modelos RFM.
+        
+        4. **Distribución de `transaction_details`**:
+        -  La variable transaction_details presenta una alta cardinalidad, lo que significa que contiene un gran número de valores únicos que dificulta su análisis directo y la identificación de patrones claros. se propone realizar una reclasificación de transaction_details agrupando los registros por palabras clave o frases similares. Esto se puede lograr mediante técnicas de procesamiento de lenguaje natural (NLP), como la identificación de palabras clave, la eliminación de stopwords, y el uso de algoritmos de similaridad textual como fuzzy matching o TF-IDF. Estas técnicas permitirán agrupar transacciones en categorías más manejables y coherentes, como "pagos", "transferencias", "compras", entre otras, facilitando su análisis.
+        """
+
+        # Mostrar el texto en Streamlit
+        st.markdown(conclusiones_categorico)
+
+
+
+        # Asegúrate de que las columnas son datetime (aunque ya lo son, es una verificación adicional)
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+        df['value_date'] = pd.to_datetime(df['value_date'], errors='coerce')
+
+        # Calcular la diferencia en segundos entre 'value_date' y 'date'
+        df['time_difference_seconds'] = (df['value_date'] - df['date']).dt.total_seconds()
+
+        # Mostrar el resultado
+        st.write("Diferencia en segundos entre 'value_date' y 'date':")
+        st.write(df[['date', 'value_date', 'time_difference_seconds']])
+                     
+       
 
     elif st.session_state.selected_main == "Deseable":
         menu_options = st.radio(
