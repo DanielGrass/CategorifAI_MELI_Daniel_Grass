@@ -20,15 +20,13 @@ logo_url = "https://http2.mlstatic.com/frontend-assets/ml-web-navigation/ui-navi
 
 # Variables para la selección de secciones
 if 'selected_main' not in st.session_state:
-    st.session_state.selected_main = None
+    st.session_state.selected_main = "Requerido"
     
 # Barra lateral con el logo y menú
 with st.sidebar:
     st.image(logo_url, use_column_width=True)  # Muestra el logo desde la URL
     st.title("Menú Principal")
-      
-    
-    st.session_state.selected_main = "Requerido"
+   
     # Botones principales para secciones
     if st.button("Requerido"):
         st.session_state.selected_main = "Requerido"
