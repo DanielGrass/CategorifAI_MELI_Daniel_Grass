@@ -1,0 +1,14 @@
+# Entornos virtuales
+venv/
+.env
+
+# Archivos de configuración
+.DS_Store
+.vscode/
+.idea/
+*.pyc
+__pycache__/
+
+# Archivos temporales
+*.log
+*.tmp
