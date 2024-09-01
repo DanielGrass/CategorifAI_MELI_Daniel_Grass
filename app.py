@@ -1,6 +1,7 @@
 import streamlit as st
 from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
 from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal, analysis_datetime_variables, analysis_withdrawal_deposit
+from modules.transactions_details_preprocesing import transactions_details_preprocesing
 from data.data_loader import load_local_parquet
 import pandas as pd
 import numpy as np
@@ -231,7 +232,7 @@ if st.session_state.selected_main:
         st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
         st.header("2.1.1 Feature Engineering")
         st.subheader("2.1.1 Normalizar y tranformar transaction_details")
-        
+        transactions_details_preprocesing(df)
         st.header("2.2 Modelo Predictivo")
         st.header("2.3 Métricas")
         st.header("2.4 Casos de Uso")
