@@ -8,6 +8,12 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.metrics import make_scorer, f1_score, accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+
+
 # Inicializar el estado del tema
 initialize_theme()
 
@@ -60,8 +66,6 @@ if st.session_state.selected_main:
         st.write("**`Reporting`**: Documente los resultados e insights obtenidos durante la exploración y describa conclusiones desde una perspectiva de negocio, soportado por gráficos / tablas / métricas.")
         st.write("**`Machine Learning`**: Describa las posibles tareas de Machine Learning que podrían realizarse desde el dataset dado, que podrían ser valiosas en el dominio dado (sólo explicar, **no entrenar un modelo**)")
         
-       
-
         # Mostrar la Descripción de las Columnas del Dataset
         st.header("Descripción de las Columnas del Dataset")
         description_dataset()
@@ -252,18 +256,92 @@ if st.session_state.selected_main:
         st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")        
         st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
         st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
+
+        ############################################################################################
+        ###############0. Objetivo del modelo propuesto:
+        ############################################################################################
+        st.header("2.0 Modelo Propuesto: Recategorización de Transacciones de gasto")
+
+        st.write("""
+        Se propone utilizar técnicas de NLP (Procesamiento de Lenguaje Natural) y modelos de clasificación para recategorizar las transacciones clasificadas actualmente como `Miscellaneous`. Esta automatización busca mejorar la precisión en la clasificación de gastos, permitiendo un análisis financiero más detallado y útil. 
+        """)
+
+        ############################################################################################
+        ###############1. Feature Engineering:
+        ############################################################################################
         st.header("2.1. Feature Engineering")
         st.subheader("2.1.1 Limpiar el campo `transaction_details` para operaciones de Retiro(withdrawal)")
         df_cleaned = transactions_details_cleaning(df)
 
         st.subheader("2.1.2 Preparación de los datos de entrenamiento")
-        feature_engineering(df_cleaned)
+        X, y = feature_engineering(df_cleaned)
 
+        # Convertir nombres de columnas a tipo string
+        X.columns = X.columns.astype(str)
+        
+        # # Aplicar la codificación de enteros a la columna de etiquetas
+        # y_encoded = pd.Series(y).astype('category').cat.codes
 
-
+        # class_counts = pd.Series(y_encoded).value_counts()
+        
+        ############################################################################################
+        ###############2. Modelo Predictivo:
+        ############################################################################################
         st.header("2.2 Modelo Predictivo")
+
+        # Aplicar Label Encoding a la variable objetivo 'y'
+        label_encoder = LabelEncoder()
+        y_encoded = label_encoder.fit_transform(y)  # Convierte las categorías en números
+
+        # Dividir los datos en conjuntos de entrenamiento y prueba (opcional para validación)
+        X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded)
+
+        # Definir el modelo Random Forest con hiperparámetros básicos
+        model = RandomForestClassifier(
+            n_estimators=100,       # Número de árboles en el bosque
+            max_depth=20,           # Profundidad máxima de los árboles
+            random_state=42         # Fija la semilla para reproducibilidad
+        )
+
+        # Definir el scoring para la validación cruzada (puede ser accuracy o F1 score)
+        scoring = make_scorer(f1_score, average='weighted')  # Usando F1 score ponderado para multiclase
+
+        # Aplicar Cross-Validation
+        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring=scoring)  # Usando 5 folds
+
+        # Mostrar los resultados de Cross-Validation
+        st.write(f"Cross-Validation F1 Score: {cv_scores}")
+        st.write(f"Mean F1 Score: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+
+        # Entrenar el modelo con el conjunto completo de entrenamiento y evaluar en el conjunto de prueba
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        # Calcular las métricas en el conjunto de prueba
+        test_f1 = f1_score(y_test, y_pred, average='weighted')
+        test_accuracy = accuracy_score(y_test, y_pred)
+
+        # Mostrar las métricas finales
+        st.write(f"F1 Score en el conjunto de prueba: {test_f1:.4f}")
+        st.write(f"Accuracy en el conjunto de prueba: {test_accuracy:.4f}")
+        ############################################################################################
+        ###############3. Métricas:
+        ############################################################################################
         st.header("2.3 Métricas")
+        # Generar el reporte de clasificación
+        report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
+
+        # Mostrar el reporte en Streamlit
+        st.text("Reporte de Clasificación:")
+        st.text(report)
+        ############################################################################################
+        ###############4. Casos de Uso
+        ############################################################################################
         st.header("2.4 Casos de Uso")
+
+        ############################################################################################
+        ###############5. Versionado de Código
+        ############################################################################################
         st.header("2.5 Versionado de Código")
         st.markdown(
             """
@@ -274,6 +352,10 @@ if st.session_state.selected_main:
             """,
             unsafe_allow_html=True
         )
+
+        ############################################################################################
+        ###############6. Mostrar Skills en Python
+        ############################################################################################
         st.header("2.6 Mostrar Skills en Python")
         st.markdown(
             """
