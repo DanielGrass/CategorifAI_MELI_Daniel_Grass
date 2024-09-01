@@ -229,8 +229,13 @@ if st.session_state.selected_main:
         st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")        
         st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
         st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
-
-        st.header("2.1 Versionado de Código")
+        st.header("2.1.1 Feature Engineering")
+        st.subheader("2.1.1 Normalizar y tranformar transaction_details")
+        
+        st.header("2.2 Modelo Predictivo")
+        st.header("2.3 Métricas")
+        st.header("2.4 Casos de Uso")
+        st.header("2.5 Versionado de Código")
         st.markdown(
             """
             <a href="https://github.com/DanielGrass/CategorifAI_MELI_Daniel_Grass" target="_blank">
@@ -240,7 +245,7 @@ if st.session_state.selected_main:
             """,
             unsafe_allow_html=True
         )
-        st.header("2.2 Mostrar Skills en Python")
+        st.header("2.6 Mostrar Skills en Python")
         st.markdown(
             """
             Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
