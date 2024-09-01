@@ -34,9 +34,9 @@ def feature_engineering(df):
         ],
         axis=1
     )
-    st.write("Conjunto X de entrenamiento ",X)
+    st.write("Conjunto `X` de entrenamiento ",X)
     # Usar `category` directamente como la variable objetivo sin codificación
     y = train_data['category']
-    st.write("Conjunto y de entrenamiento ",y)
+    st.write("Conjunto `y` de entrenamiento ",y)
 
 

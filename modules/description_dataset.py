@@ -146,25 +146,25 @@ def plot_distribution_with_outlier_removal(column, df):
     fig_hist_no_outliers = px.histogram(df_no_outliers, x=column, nbins=50, title=f"Histograma de {column} (Sin Outliers)", marginal="box")
     st.plotly_chart(fig_hist_no_outliers)
 
-    # Análisis de ajuste de distribuciones con Fitter en datos sin outliers
-    st.write("### Ajuste de Distribuciones con Fitter")
+    # # Análisis de ajuste de distribuciones con Fitter en datos sin outliers
+    # st.write("### Ajuste de Distribuciones con Fitter")
    
-    # Crear el objeto Fitter con las distribuciones seleccionadas
-    f = Fitter(df_no_outliers[column].dropna(), distributions=[
-        'expon', 'norm', 'johnsonsb', 'lognorm', 'uniform'
-    ])
+    # # Crear el objeto Fitter con las distribuciones seleccionadas
+    # f = Fitter(df_no_outliers[column].dropna(), distributions=[
+    #     'expon', 'norm', 'johnsonsb', 'lognorm', 'uniform'
+    # ])
     
-    # Ajustar las distribuciones
-    f.fit()
-    best_fit = f.get_best(method='sumsquare_error')
+    # # Ajustar las distribuciones
+    # f.fit()
+    # best_fit = f.get_best(method='sumsquare_error')
 
-    # Mostrar el mejor ajuste encontrado
-    st.write(f"Mejor ajuste para `{column}`: {list(best_fit.keys())[0]}")
+    # # Mostrar el mejor ajuste encontrado
+    # st.write(f"Mejor ajuste para `{column}`: {list(best_fit.keys())[0]}")
 
-    # Mostrar el resumen de los ajustes sin argumento 'ax'
-    fig = plt.figure(figsize=(10, 5))
-    f.summary()  # Generar y mostrar el gráfico del ajuste
-    st.pyplot(fig)  # Mostrar el gráfico en Streamlit
+    # # Mostrar el resumen de los ajustes sin argumento 'ax'
+    # fig = plt.figure(figsize=(10, 5))
+    # f.summary()  # Generar y mostrar el gráfico del ajuste
+    # st.pyplot(fig)  # Mostrar el gráfico en Streamlit
 
     
 def analysis_datetime_variables(df):
