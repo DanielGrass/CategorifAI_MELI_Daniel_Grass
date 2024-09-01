@@ -1,7 +1,8 @@
 import streamlit as st
 from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
 from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal, analysis_datetime_variables, analysis_withdrawal_deposit
-from modules.transactions_details_preprocesing import transactions_details_preprocesing
+from modules.transactions_details_preprocesing import transactions_details_cleaning
+from modules.feature_engineering import feature_engineering
 from data.data_loader import load_local_parquet
 import pandas as pd
 import numpy as np
@@ -117,7 +118,28 @@ if st.session_state.selected_main:
 
         # Mostrar el texto en Streamlit
         st.markdown(conclusiones_categorico)
+        
+        # Filtrar los datos para depósitos y retiros
+        deposit_data = df[df['deposit_amt'].notnull()]
+        withdrawal_data = df[df['withdrawal_amt'].notnull()]
 
+        # Crear gráficos separados para depósitos y retiros
+
+        # Gráfico para Depósitos
+        st.subheader("Distribución de `category` para depositos")
+        plot_categorical_distribution_with_pareto(
+            column_name='category',
+            data=deposit_data,
+            color='green'
+        )
+
+        # Gráfico para Retiros
+        st.subheader("Distribución de `category` para retiros")
+        plot_categorical_distribution_with_pareto(
+            column_name='category',
+            data=withdrawal_data,
+            color='blue'
+        )
         ############################################################################################
         ###############4. Análisis variables continuas (Distribuciones y tratamiento de anomalos):
         ############################################################################################
@@ -230,9 +252,15 @@ if st.session_state.selected_main:
         st.write("**`Mostrar Skills en Python`**: Teniendo buenas prácticas en la estructura del código y la documentación.")        
         st.write("**`Casos de Uso`**: Describir posibles casos de uso a tratar con este dataset que podrían agregar valor al negocio dado, indicando métodos, técnicas, y algoritmos por cada uno de ellos, así como justificando las decisiones tomadas.")
         st.write("**`Métricas`**: Definir y calcular las métricas que considere más relevantes para la problemática propuesta.")
-        st.header("2.1.1 Feature Engineering")
-        st.subheader("2.1.1 Normalizar y tranformar transaction_details")
-        transactions_details_preprocesing(df)
+        st.header("2.1. Feature Engineering")
+        st.subheader("2.1.1 Limpiar el campo `transaction_details` para operaciones de Retiro(withdrawal)")
+        df_cleaned = transactions_details_cleaning(df)
+
+        st.subheader("2.1.2 Preparación de los datos de entrenamiento")
+        feature_engineering(df_cleaned)
+
+
+
         st.header("2.2 Modelo Predictivo")
         st.header("2.3 Métricas")
         st.header("2.4 Casos de Uso")
@@ -249,8 +277,6 @@ if st.session_state.selected_main:
         st.header("2.6 Mostrar Skills en Python")
         st.markdown(
             """
-            Se destacan las buenas prácticas en la estructura del código y la documentación del proyecto, reflejadas en los siguientes puntos:
-
             1. **Organización del Código**: El código está estructurado en módulos claros y separados, lo que facilita la comprensión, el mantenimiento y la escalabilidad del proyecto. Se siguen convenciones de nombres y se utiliza la modularidad para organizar funciones y componentes de manera eficiente.
 
             2. **Uso de Funciones y Modularización**: Se emplea una buena práctica de definir funciones para tareas repetitivas, minimizando la redundancia y mejorando la legibilidad del código. Las funciones se han agrupado lógicamente en módulos como `theme_toggle.py`, `description_dataset.py`, y `data_loader.py`, siguiendo un enfoque modular que facilita la navegación y el mantenimiento del código.
