@@ -332,6 +332,7 @@ if st.session_state.selected_main:
         ###############4. Casos de Uso
         ############################################################################################
         st.header("2.4 Casos de Uso")
+
         st.write("### Detección de Comportamientos Financieros") 
         st.write("`Recategorizar` las transacciones mejora la comprensión del `comportamiento de los usuarios`, permitiendo detectar `patrones de gasto` que podrían indicar áreas de oportunidad para productos financieros personalizados.")
         st.write("""
@@ -339,8 +340,8 @@ if st.session_state.selected_main:
                     - Técnica: Agrupamiento de transacciones y análisis de series temporales.
                     - Algoritmos: K-means, Clustering jerárquico, RFM.
                     - Justificación: Permite adaptar ofertas comerciales a los patrones de consumo identificados, generando valor agregado al usuario.
-                 """)
-        
+                """)
+
         st.write("### Análisis de Tendencias de Consumo") 
         st.write("La `recategorización` ayudará a analizar `tendencias específicas de gasto` en categorías relevantes, permitiendo la `personalización de servicios financieros` y campañas de marketing más efectivas.")
         st.write("""
@@ -348,7 +349,16 @@ if st.session_state.selected_main:
                     - Técnica: Modelos de series temporales y análisis de segmentación.
                     - Algoritmos: Prophet, LSTM.
                     - Justificación: Proporciona insights accionables para diseñar estrategias de marketing dirigidas y programas de fidelización personalizados.
-                 """)
+                """)
+
+        st.write("### Ofrecer Crédito y Evaluar Capacidad de Endeudamiento")
+        st.write("La `recategorización de transacciones` permite una mejor evaluación de la `capacidad de endeudamiento de los usuarios` y ofrece una visión más clara sobre su `comportamiento financiero`, facilitando la `oferta de productos de crédito` ajustados a su perfil.")
+        st.write("""
+                    - Método: Análisis de historial de transacciones y categorización de ingresos y gastos.
+                    - Técnica: Modelos de evaluación crediticia basados en comportamiento transaccional y puntuaciones de riesgo.
+                    - Algoritmos: Random Forest, XGBoost, Modelos de regresión.
+                    - Justificación: Ayuda a identificar usuarios con capacidad de endeudamiento responsable y a minimizar riesgos de crédito, personalizando las ofertas y mejorando la toma de decisiones financieras.
+                """)
 
         ############################################################################################
         ###############5. Versionado de Código
