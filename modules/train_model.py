@@ -17,10 +17,10 @@ def train_random_forest_with_grid_search(X, y):
 
     # Definir los hiperparámetros a ajustar
     param_grid = {
-        'n_estimators': [50, 100, 150],       # Número de árboles en el bosque
-        'max_depth': [10, 20, 30],            # Profundidad máxima de cada árbol
-        'min_samples_split': [2, 5, 10],      # Número mínimo de muestras requeridas para dividir un nodo
-        'min_samples_leaf': [1, 2, 4]         # Número mínimo de muestras necesarias en cada hoja
+        'n_estimators': [50, 60],       # Número de árboles en el bosque
+        'max_depth': [20, 30],            # Profundidad máxima de cada árbol
+        'min_samples_split': [5, 10],      # Número mínimo de muestras requeridas para dividir un nodo
+        'min_samples_leaf': [1, 2]         # Número mínimo de muestras necesarias en cada hoja
     }
 
     # Definir el scoring como F1 Score con promedio ponderado
