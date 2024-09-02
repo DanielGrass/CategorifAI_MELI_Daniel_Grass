@@ -3,6 +3,8 @@ from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
 from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal, analysis_datetime_variables, analysis_withdrawal_deposit
 from modules.transactions_details_preprocesing import transactions_details_cleaning
 from modules.feature_engineering import feature_engineering
+from modules.train_model import train_random_forest_with_grid_search
+from modules.metrics import display_classification_metrics
 from data.data_loader import load_local_parquet
 import numpy as np
 import matplotlib.pyplot as plt
@@ -290,104 +292,13 @@ if st.session_state.selected_main:
         ############################################################################################
         st.header("2.2 Modelo Predictivo")
         st.write("Ejecutando GridSearchCV para el Random Forest (tarda alrededor de 1 minuto) ... ")
-        # Aplicar Label Encoding a la variable objetivo 'y'
-        label_encoder = LabelEncoder()
-        y_encoded = label_encoder.fit_transform(y)  # Convierte las categorías en números
-
-        # Dividir los datos en conjuntos de entrenamiento y prueba (opcional para validación)
-        X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded)
-        # Definir el modelo base
-        model = RandomForestClassifier(random_state=42)
-
-        # Definir los hiperparámetros a ajustar
-        param_grid = {
-            'n_estimators': [50, 100, 150],   # Número de árboles en el bosque
-            'max_depth': [10, 20, 30],         # Profundidad máxima de cada árbol
-            'min_samples_split': [2, 5, 10], # Número mínimo de muestras requeridas para dividir un nodo.
-            'min_samples_leaf': [1, 2, 4] # Número mínimo de muestras necesarias en cada hoja.
-        }
-
-        # Definir el scoring como F1 Score con promedio ponderado
-        scoring = make_scorer(f1_score, average='weighted')
-
-        # Configurar GridSearchCV
-        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring=scoring, n_jobs=-1)
-
-        # Realizar la búsqueda de hiperparámetros
-        grid_search.fit(X_train, y_train)
-
-        # Mostrar los mejores parámetros y el mejor score
-        best_params = grid_search.best_params_
-        best_score = grid_search.best_score_
-
-        st.write(f"Mejores Hiperparámetros de `random forest`: {best_params}")
-        st.write(f"Mejor `F1 Score` obtenido: {best_score:.4f}")
-
-        # Extraer el mejor modelo después de la búsqueda
-        best_model = grid_search.best_estimator_
-
-        # Realizar predicciones con el modelo entrenado
-        y_pred = best_model.predict(X_test)
-
-
+        y_test, y_pred, best_model, label_encoder = train_random_forest_with_grid_search(X, y)
+        
         ############################################################################################
         ###############3. Métricas:
         ############################################################################################
         st.header("2.3 Métricas")
-        # Matriz de Confusión
-        st.write("### Matriz de Confusión:")
-        # Calcular la matriz de confusión
-        conf_matrix = confusion_matrix(y_test, y_pred)
-
-        # Graficar la matriz de confusión
-        plt.figure(figsize=(10, 7))
-        sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=label_encoder.classes_, yticklabels=label_encoder.classes_)
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
-        plt.title('Confusion Matrix')
-        st.pyplot(plt)
-        # Generar el reporte de clasificación
-        report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
-
-        # Mostrar el reporte en Streamlit
-        st.text("Reporte de Clasificación:")
-        st.text(report)
-
-        st.write("### Análisis de Métricas por Clase:")
-        st.write("**`1. Financial and Savings`**")
-        st.write("- **Precision:** 1.00")
-        st.write("- **Recall:** 1.00")
-        st.write("- **F1-score:** 1.00")
-        st.write("- **Conclusión:** El modelo predice esta categoría con una `precisión perfecta`. No hay falsos positivos ni falsos negativos, lo que indica un `excelente rendimiento` para esta clase.")
-
-        st.write("**`2. Health and Wellness`**")
-        st.write("- **Precision:** 1.00")
-        st.write("- **Recall:** 0.99")
-        st.write("- **F1-score:** 1.00")
-        st.write("- **Conclusión:** La `precisión es perfecta`, pero el `recall es ligeramente menor`, lo que sugiere que casi todas las transacciones reales se capturan correctamente. Solo hay un pequeño número de falsos negativos.")
-
-        st.write("**`3. Payments for Services and Basic Needs`**")
-        st.write("- **Precision:** 0.99")
-        st.write("- **Recall:** 0.99")
-        st.write("- **F1-score:** 0.99")
-        st.write("- **Conclusión:** El modelo maneja bien esta clase con un muy buen equilibrio entre precisión y recall. Hay una `pequeña cantidad de errores`, pero en general, el modelo clasifica esta categoría de manera efectiva.")
-
-        st.write("**`4. Personal Care, Entertainment, and Education`**")
-        st.write("- **Precision:** 1.00")
-        st.write("- **Recall:** 0.80")
-        st.write("- **F1-score:** 0.89")
-        st.write("- **Conclusión:** Aunque la `precisión es alta`, el `recall es significativamente más bajo`, lo que indica que el modelo no captura una proporción considerable de transacciones reales de esta clase. Podría beneficiarse de ajustar los datos de entrenamiento o las características para mejorar la detección.")
-
-        st.write("**`5. Shopping and Consumption`**")
-        st.write("- **Precision:** 1.00")
-        st.write("- **Recall:** 0.92")
-        st.write("- **F1-score:** 0.96")
-        st.write("- **Conclusión:** El modelo tiene una `alta precisión` pero `pierde algunos casos` reales. Esto sugiere que puede haber ligeras confusiones con otras categorías, pero en general, el rendimiento sigue siendo sólido.")
-
-        st.write("###`Conclusiones Generales:`")
-        st.write("- El modelo demuestra un `rendimiento muy fuerte` en general, con altas métricas de precisión, recall y F1-score en casi todas las categorías.")
-        st.write("- La clase `Personal Care, Entertainment, and Education` muestra un recall `notablemente más bajo`, lo que indica que podría beneficiarse de un enfoque de ajuste adicional, como aumentar los datos de entrenamiento de esa clase o ajustar los hiperparámetros para capturar mejor las instancias.")
-        st.write("- La `precisión` en todas las clases es `excelente`, lo que significa que el modelo tiene muy pocos falsos positivos, lo cual es crucial para evitar clasificaciones incorrectas en un contexto de análisis financiero.")
+        display_classification_metrics(y_test, y_pred, label_encoder)
 
         ############################################################################################
         ###############4. Casos de Uso
