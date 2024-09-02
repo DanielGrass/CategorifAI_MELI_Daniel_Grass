@@ -4,15 +4,15 @@ from modules.description_dataset import description_dataset, null_analysis, plot
 from modules.transactions_details_preprocesing import transactions_details_cleaning
 from modules.feature_engineering import feature_engineering
 from data.data_loader import load_local_parquet
-import pandas as pd
 import numpy as np
-import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import make_scorer, f1_score, accuracy_score, classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import make_scorer, f1_score, classification_report, confusion_matrix
+from sklearn.model_selection import  train_test_split
 from sklearn.preprocessing import LabelEncoder
-
 
 # Inicializar el estado del tema
 initialize_theme()
@@ -260,11 +260,17 @@ if st.session_state.selected_main:
         ############################################################################################
         ###############0. Objetivo del modelo propuesto:
         ############################################################################################
-        st.header("2.0 Modelo Propuesto: Recategorización de Transacciones de gasto")
+        st.header("2.0 Modelo Propuesto: Recategorización Automatizada de Transacciones de Retiro")
 
         st.write("""
-        Se propone utilizar técnicas de NLP (Procesamiento de Lenguaje Natural) y modelos de clasificación para recategorizar las transacciones clasificadas actualmente como `Miscellaneous`. Esta automatización busca mejorar la precisión en la clasificación de gastos, permitiendo un análisis financiero más detallado y útil. 
-        """)
+                    Se propone implementar un modelo basado en técnicas de NLP (Procesamiento de Lenguaje Natural) combinado con algoritmos de clasificación
+                    para recategorizar de manera automatizada las transacciones actualmente etiquetadas como "Miscellaneous". Esta metodología permitirá una
+                    clasificación más precisa y coherente de los retiros, aportando un análisis financiero detallado y más útil para la toma de decisiones estratégicas.
+                 
+                    - `Método`: Clasificación de texto con modelos de NLP y algoritmos de Machine Learning.
+                    - `Técnica`: Transformaciones de texto con TF-IDF, Word Embeddings.
+                    - `Algoritmo ML propuesto`: Random Forest.
+                 """)
 
         ############################################################################################
         ###############1. Feature Engineering:
@@ -278,66 +284,132 @@ if st.session_state.selected_main:
 
         # Convertir nombres de columnas a tipo string
         X.columns = X.columns.astype(str)
-        
-        # # Aplicar la codificación de enteros a la columna de etiquetas
-        # y_encoded = pd.Series(y).astype('category').cat.codes
-
-        # class_counts = pd.Series(y_encoded).value_counts()
-        
+              
         ############################################################################################
         ###############2. Modelo Predictivo:
         ############################################################################################
         st.header("2.2 Modelo Predictivo")
-
+        st.write("Ejecutando GridSearchCV para el Random Forest (tarda alrededor de 1 minuto) ... ")
         # Aplicar Label Encoding a la variable objetivo 'y'
         label_encoder = LabelEncoder()
         y_encoded = label_encoder.fit_transform(y)  # Convierte las categorías en números
 
         # Dividir los datos en conjuntos de entrenamiento y prueba (opcional para validación)
         X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded)
+        # Definir el modelo base
+        model = RandomForestClassifier(random_state=42)
 
-        # Definir el modelo Random Forest con hiperparámetros básicos
-        model = RandomForestClassifier(
-            n_estimators=100,       # Número de árboles en el bosque
-            max_depth=20,           # Profundidad máxima de los árboles
-            random_state=42         # Fija la semilla para reproducibilidad
-        )
+        # Definir los hiperparámetros a ajustar
+        param_grid = {
+            'n_estimators': [50, 100, 150],   # Número de árboles en el bosque
+            'max_depth': [10, 20, 30],         # Profundidad máxima de cada árbol
+            'min_samples_split': [2, 5, 10], # Número mínimo de muestras requeridas para dividir un nodo.
+            'min_samples_leaf': [1, 2, 4] # Número mínimo de muestras necesarias en cada hoja.
+        }
 
-        # Definir el scoring para la validación cruzada (puede ser accuracy o F1 score)
-        scoring = make_scorer(f1_score, average='weighted')  # Usando F1 score ponderado para multiclase
+        # Definir el scoring como F1 Score con promedio ponderado
+        scoring = make_scorer(f1_score, average='weighted')
 
-        # Aplicar Cross-Validation
-        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring=scoring)  # Usando 5 folds
+        # Configurar GridSearchCV
+        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring=scoring, n_jobs=-1)
 
-        # Mostrar los resultados de Cross-Validation
-        st.write(f"Cross-Validation F1 Score: {cv_scores}")
-        st.write(f"Mean F1 Score: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+        # Realizar la búsqueda de hiperparámetros
+        grid_search.fit(X_train, y_train)
 
-        # Entrenar el modelo con el conjunto completo de entrenamiento y evaluar en el conjunto de prueba
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+        # Mostrar los mejores parámetros y el mejor score
+        best_params = grid_search.best_params_
+        best_score = grid_search.best_score_
 
-        # Calcular las métricas en el conjunto de prueba
-        test_f1 = f1_score(y_test, y_pred, average='weighted')
-        test_accuracy = accuracy_score(y_test, y_pred)
+        st.write(f"Mejores Hiperparámetros de `random forest`: {best_params}")
+        st.write(f"Mejor `F1 Score` obtenido: {best_score:.4f}")
 
-        # Mostrar las métricas finales
-        st.write(f"F1 Score en el conjunto de prueba: {test_f1:.4f}")
-        st.write(f"Accuracy en el conjunto de prueba: {test_accuracy:.4f}")
+        # Extraer el mejor modelo después de la búsqueda
+        best_model = grid_search.best_estimator_
+
+        # Realizar predicciones con el modelo entrenado
+        y_pred = best_model.predict(X_test)
+
+
         ############################################################################################
         ###############3. Métricas:
         ############################################################################################
         st.header("2.3 Métricas")
+        # Matriz de Confusión
+        st.write("### Matriz de Confusión:")
+        # Calcular la matriz de confusión
+        conf_matrix = confusion_matrix(y_test, y_pred)
+
+        # Graficar la matriz de confusión
+        plt.figure(figsize=(10, 7))
+        sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=label_encoder.classes_, yticklabels=label_encoder.classes_)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix')
+        st.pyplot(plt)
         # Generar el reporte de clasificación
         report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
 
         # Mostrar el reporte en Streamlit
         st.text("Reporte de Clasificación:")
         st.text(report)
+
+        st.write("### Análisis de Métricas por Clase:")
+        st.write("**`1. Financial and Savings`**")
+        st.write("- **Precision:** 1.00")
+        st.write("- **Recall:** 1.00")
+        st.write("- **F1-score:** 1.00")
+        st.write("- **Conclusión:** El modelo predice esta categoría con una `precisión perfecta`. No hay falsos positivos ni falsos negativos, lo que indica un `excelente rendimiento` para esta clase.")
+
+        st.write("**`2. Health and Wellness`**")
+        st.write("- **Precision:** 1.00")
+        st.write("- **Recall:** 0.99")
+        st.write("- **F1-score:** 1.00")
+        st.write("- **Conclusión:** La `precisión es perfecta`, pero el `recall es ligeramente menor`, lo que sugiere que casi todas las transacciones reales se capturan correctamente. Solo hay un pequeño número de falsos negativos.")
+
+        st.write("**`3. Payments for Services and Basic Needs`**")
+        st.write("- **Precision:** 0.99")
+        st.write("- **Recall:** 0.99")
+        st.write("- **F1-score:** 0.99")
+        st.write("- **Conclusión:** El modelo maneja bien esta clase con un muy buen equilibrio entre precisión y recall. Hay una `pequeña cantidad de errores`, pero en general, el modelo clasifica esta categoría de manera efectiva.")
+
+        st.write("**`4. Personal Care, Entertainment, and Education`**")
+        st.write("- **Precision:** 1.00")
+        st.write("- **Recall:** 0.80")
+        st.write("- **F1-score:** 0.89")
+        st.write("- **Conclusión:** Aunque la `precisión es alta`, el `recall es significativamente más bajo`, lo que indica que el modelo no captura una proporción considerable de transacciones reales de esta clase. Podría beneficiarse de ajustar los datos de entrenamiento o las características para mejorar la detección.")
+
+        st.write("**`5. Shopping and Consumption`**")
+        st.write("- **Precision:** 1.00")
+        st.write("- **Recall:** 0.92")
+        st.write("- **F1-score:** 0.96")
+        st.write("- **Conclusión:** El modelo tiene una `alta precisión` pero `pierde algunos casos` reales. Esto sugiere que puede haber ligeras confusiones con otras categorías, pero en general, el rendimiento sigue siendo sólido.")
+
+        st.write("###`Conclusiones Generales:`")
+        st.write("- El modelo demuestra un `rendimiento muy fuerte` en general, con altas métricas de precisión, recall y F1-score en casi todas las categorías.")
+        st.write("- La clase `Personal Care, Entertainment, and Education` muestra un recall `notablemente más bajo`, lo que indica que podría beneficiarse de un enfoque de ajuste adicional, como aumentar los datos de entrenamiento de esa clase o ajustar los hiperparámetros para capturar mejor las instancias.")
+        st.write("- La `precisión` en todas las clases es `excelente`, lo que significa que el modelo tiene muy pocos falsos positivos, lo cual es crucial para evitar clasificaciones incorrectas en un contexto de análisis financiero.")
+
         ############################################################################################
         ###############4. Casos de Uso
         ############################################################################################
         st.header("2.4 Casos de Uso")
+        st.write("### Detección de Comportamientos Financieros") 
+        st.write("`Recategorizar` las transacciones mejora la comprensión del `comportamiento de los usuarios`, permitiendo detectar `patrones de gasto` que podrían indicar áreas de oportunidad para productos financieros personalizados.")
+        st.write("""
+                    - Método: Análisis de comportamiento a través de las nuevas categorías de transacciones.
+                    - Técnica: Agrupamiento de transacciones y análisis de series temporales.
+                    - Algoritmos: K-means, Clustering jerárquico, RFM.
+                    - Justificación: Permite adaptar ofertas comerciales a los patrones de consumo identificados, generando valor agregado al usuario.
+                 """)
+        
+        st.write("### Análisis de Tendencias de Consumo") 
+        st.write("La `recategorización` ayudará a analizar `tendencias específicas de gasto` en categorías relevantes, permitiendo la `personalización de servicios financieros` y campañas de marketing más efectivas.")
+        st.write("""
+                    - Método: Análisis predictivo de categorías específicas.
+                    - Técnica: Modelos de series temporales y análisis de segmentación.
+                    - Algoritmos: Prophet, LSTM.
+                    - Justificación: Proporciona insights accionables para diseñar estrategias de marketing dirigidas y programas de fidelización personalizados.
+                 """)
 
         ############################################################################################
         ###############5. Versionado de Código
@@ -373,7 +445,7 @@ if st.session_state.selected_main:
         )
 
     elif st.session_state.selected_main == "Bonus":
-        st.header("Tareas requeridas")
+        st.header("Tareas Bonus")
         st.write("**`Manejo de Environment de Desarrollo`**: Manejo de environment de desarrollo mediante alguna tecnología (e.g. Docker, virtualenv, conda).")
         st.write("**`Identificar Nuevos Atributos`**: Identificar nuevos atributos / tablas que podrían ser relevantes o necesarias para un mejor análisis.")
        
