@@ -396,5 +396,22 @@ if st.session_state.selected_main:
     elif st.session_state.selected_main == "Bonus":
         st.header("Tareas Bonus")
         st.write("**`Manejo de Environment de Desarrollo`**: Manejo de environment de desarrollo mediante alguna tecnología (e.g. Docker, virtualenv, conda).")
+        st.write("""Se utilizó `virtualenv` para la gestión del entorno de desarrollo, asegurando un entorno limpio y controlado para el proyecto. Además, se configuró 
+                    el despliegue automático en `Heroku` mediante integración continua con `GitHub`, permitiendo actualizaciones rápidas y eficientes del aplicativo.
+                    Sin embargo, se identificaron `limitaciones de memoria` durante el despliegue en Heroku, lo que impacta el rendimiento del modelo de clasificación. 
+                    Para mejorar la velocidad de ejecución y aprovechar los recursos de manera óptima, se recomienda ejecutar la aplicación desde `localhost`, donde se puede 
+                    asignar más memoria y recursos computacionales.
+                    Acceso página desplegada en Heroku: https://categorifai-dg-d6c685ceeb6a.herokuapp.com/
+                """
+                )
         st.write("**`Identificar Nuevos Atributos`**: Identificar nuevos atributos / tablas que podrían ser relevantes o necesarias para un mejor análisis.")
-       
+        st.write("""
+                - **Latitudes y Longitudes**: Al capturar la posición geográfica exacta de la transacción, es posible identificar patrones relacionados con la ubicación, como la proximidad a zonas comerciales, restaurantes, tiendas de ropa, entre otros. Esto no solo facilita la clasificación, sino que también puede revelar comportamientos de consumo basados en la localización.
+                - **Tipo de Comercio / Nombre del Comercio**: Guardar información sobre el tipo de comercio o el nombre específico del establecimiento puede añadir contexto valioso sobre la transacción, permitiendo una categorización más precisa y útil para los análisis de consumo.
+                - **Hora y Minuto de la Transacción**: Incluir estos atributos permitirá un análisis temporal más detallado, identificando patrones de gasto en diferentes momentos del día, lo cual es crucial para segmentar comportamientos y ajustar ofertas comerciales en tiempo real.
+
+                **Posibles Nuevas Tablas**:
+                - **Tabla de Comercios**: Contendría información detallada de los comercios, como su nombre, tipo, dirección, y categoría principal. Esta tabla sería útil para relacionar transacciones con establecimientos específicos y enriquecer el análisis.
+                - **Tabla de Geolocalización**: Almacenar zonas específicas o áreas comerciales relevantes, con información agregada sobre tipos de comercios presentes en dichas zonas.
+                - **Tabla de Horarios de Consumo**: Capturar y analizar patrones de consumo por horas, días de la semana y períodos del día (mañana, tarde, noche), para evaluar si ciertos momentos influyen en la frecuencia o tipo de transacciones.
+                """)
