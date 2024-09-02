@@ -91,11 +91,11 @@ def feature_engineering(df):
         ],
         axis=1
     )
-    st.write("`Conjunto X de entrenamiento`",X)
+    
     # Usar `category` directamente como la variable objetivo sin codificación
     y = train_data['group_category']
 
-    st.write("`Conjunto y de entrenamiento`",y)
+    
     return X, y
 
 
@@ -129,6 +129,6 @@ def feature_engineering_predict(df):
         ],
         axis=1
     )
-    st.write("`Conjunto X de predicción`", X_predict)
+    # st.write("`Conjunto X de predicción`", X_predict)
 
     return X_predict
