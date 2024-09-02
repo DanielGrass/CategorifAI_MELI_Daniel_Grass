@@ -1,20 +1,15 @@
 import streamlit as st
+import numpy as np
+import pandas as pd
 from modules.theme_toggle import initialize_theme, toggle_theme, apply_styles
 from modules.description_dataset import description_dataset, null_analysis, plot_categorical_distribution_with_pareto, plot_distribution_with_outlier_removal, analysis_datetime_variables, analysis_withdrawal_deposit
 from modules.transactions_details_preprocesing import transactions_details_cleaning
-from modules.feature_engineering import feature_engineering
+from modules.feature_engineering import feature_engineering, feature_engineering_predict
 from modules.train_model import train_random_forest_with_grid_search
 from modules.metrics import display_classification_metrics
+from modules.classification_result import pre_classification_result
 from data.data_loader import load_local_parquet
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import make_scorer, f1_score, classification_report, confusion_matrix
-from sklearn.model_selection import  train_test_split
-from sklearn.preprocessing import LabelEncoder
 
 # Inicializar el estado del tema
 initialize_theme()
@@ -293,6 +288,39 @@ if st.session_state.selected_main:
         st.header("2.2 Modelo Predictivo")
         st.write("Ejecutando GridSearchCV para el Random Forest (tarda alrededor de 1 minuto) ... ")
         y_test, y_pred, best_model, label_encoder = train_random_forest_with_grid_search(X, y)
+        
+
+        withdrawal_data = df[df['withdrawal_amt'].notnull()]
+        pre_classification_result(withdrawal_data, "Distribución de `group_category` para depositos `antes` de la recategorización")
+
+        # Filtrar los datos de retiro con categoría Miscellaneous
+        miscellaneous_data = withdrawal_data[withdrawal_data['category'] == 'Miscellaneous'].reset_index(drop=True)  
+
+        X_pred = feature_engineering_predict(miscellaneous_data)
+
+        # Convertir nombres de columnas a tipo string
+        X_pred.columns = X_pred.columns.astype(str)
+        # Asegurarse de que X_pred tenga exactamente las mismas columnas que X_train
+        X_pred_aligned = X_pred.reindex(columns=X.columns, fill_value=0)
+        # Realizar predicciones con el mejor modelo
+        y_pred_miscellaneous = best_model.predict(X_pred_aligned)
+
+        # Decodificar las etiquetas predichas a su forma original
+        y_pred_decoded = label_encoder.inverse_transform(y_pred_miscellaneous)
+
+        # Crear el DataFrame con la columna 'group_category'
+        predictions_df = pd.DataFrame(y_pred_decoded, columns=['group_category'])
+        # Mostrar las predicciones decodificadas
+        st.write("`Predicciones de las transacciones Miscellaneous recategorizadas:`")
+        st.write(predictions_df)
+
+        st.subheader("Distribución de `group_category` para depositos `después` de la recategorización")
+        plot_categorical_distribution_with_pareto(
+            column_name='group_category',
+            data= predictions_df,
+            color='green'
+        )
+
         
         ############################################################################################
         ###############3. Métricas:

@@ -1,6 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 import streamlit as st
+import re
 
 
 def feature_engineering(df):    
@@ -95,9 +96,39 @@ def feature_engineering(df):
     y = train_data['group_category']
 
     st.write("`Conjunto y de entrenamiento`",y)
-
-
-
     return X, y
 
 
+def feature_engineering_predict(df):    
+    # Función de limpieza básica de texto
+    def preprocess(texto):
+        texto = texto.lower()  # Convertir a minúsculas
+        texto = re.sub(r'\d+', '', texto)  # Eliminar números
+        texto = re.sub(r"[^\w\s]", '', texto)  # Eliminar caracteres especiales
+        return texto
+
+    df['transaction_details_non_nan'] = df['transaction_details'].fillna(value="nan")
+    # Aplicar la limpieza de texto
+    df['transaction_details_clean'] = df['transaction_details_non_nan'].apply(preprocess)   
+
+    # One-Hot Encoding para variables categóricas, excepto `category`
+    train_data_encoded = pd.get_dummies(df, columns=['device', 'city'])
+
+    # Extraer características de texto con TF-IDF
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=500)
+    X_text = vectorizer.fit_transform(df['transaction_details_clean'])
+
+    # Unir las características relevantes (TF-IDF, montos y categóricas codificadas)
+    X_predict = pd.concat(
+        [
+            pd.DataFrame(X_text.toarray()),
+            train_data_encoded[
+                ['withdrawal_amt']
+                + list(train_data_encoded.columns[train_data_encoded.columns.str.startswith(('device_', 'city_'))])
+            ]
+        ],
+        axis=1
+    )
+    st.write("`Conjunto X de predicción`", X_predict)
+
+    return X_predict
